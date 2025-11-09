@@ -16,6 +16,11 @@ This repository contains files and documentation to help you integrate **n8n** a
 6. Change the HTTP Method to **POST** if it’s not already set.
 7. Save the workflow and proceed to Wazuh configuration.
 
+<img width="344" height="496" alt="image" src="https://github.com/user-attachments/assets/3bde44b5-07be-40ad-8e52-683de807c4bd" />
+
+<img width="836" height="398" alt="image" src="https://github.com/user-attachments/assets/7827cdee-9723-49cf-9846-b3f498f5e05b" />
+
+
 ## 2. Configuring Wazuh
 
 After setting up n8n, configure your Wazuh servers.  
