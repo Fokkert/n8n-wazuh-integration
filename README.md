@@ -1,1 +1,1 @@
-# n8n - Wazauh Integration Guide
+# n8n - Wazuh Integration Guide
