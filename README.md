@@ -1,7 +1,6 @@
 # n8n – Wazuh Integration Guide
 
-This repository contains files and documentation to help you integrate **n8n** and **Wazuh**, enabling you to receive Wazuh alerts directly in your n8n workflows.  
-This integration allows you to automate notifications, responses, and documentation based on Wazuh alerts—ensuring you never miss one.
+This repository contains files and documentation to help you integrate **n8n** and **Wazuh**, enabling you to receive Wazuh alerts directly in your n8n workflows. This integration allows you to automate notifications, responses, and documentation based on Wazuh alerts—ensuring you never miss one.
 
 **Wazuh** is an open-source SIEM and XDR platform with numerous capabilities.  
 **n8n** is another open-source automation platform used by many developers and IT technicians to automate IT procedures and daily tasks.
@@ -38,7 +37,7 @@ You **must** apply these changes to **all members** of your Wazuh Server cluster
 4. The `.py` file must match the name you used for the first script (with `.py` as the suffix).
 5. Edit the `custom-n8n.py` script as follows:
 
-   - If **Authentication is disabled** in your n8n Webhook node, comment out or remove these parts:
+   - If **Authentication is disabled** in your n8n Webhook node, comment out or remove these lines ( keep `"content-type": "application/json"` ) :
 
 ```python
 WEBHOOK_AUTH_TOKEN = "<Your-Authentication-Token>"
@@ -53,7 +52,7 @@ headers = {
 
    - If **Authentication is enabled**, replace `<Your-Authentication-Token>` with the **Value** you set in n8n credentials, and replace `"Wazuh-Webhook-Auth-Token"` with the **Credential Name** used in n8n.
 
-6. If your n8n instance has a valid SSL certificate, comment out this line completely:
+6. If your n8n instance has a valid SSL certificate, comment out or remove this line completely:
 
 ```python
 # Disable SSL certificate warnings (comment out if you have a valid certificate)
@@ -68,8 +67,8 @@ Edit the Wazuh Server configuration to use your custom integration script:
 
 1. Open:
 
-```plaintext
-/var/ossec/etc/ossec.conf
+```bash
+sudo nano /var/ossec/etc/ossec.conf
 ```
 
 2. Inside the `<ossec_config>` tag, insert:
@@ -93,4 +92,9 @@ Restart the Wazuh Manager service to apply changes:
 sudo systemctl restart wazuh-manager
 ```
 
-✅ **You’re all set! , Just wait for the first allert and then extend your workflow based on that !**  
+### Debugging The Integration
+
+You can check `/var/ossec/logs/integrations.log` to find any errors or alerts that could potentially interrupt your integration.
+
+
+✅ **You’re all set! , Just wait for the first alert and then extend your workflow based on that !**  
