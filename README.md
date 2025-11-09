@@ -1,47 +1,96 @@
-# n8n - Wazuh Integration Guide
+# n8n – Wazuh Integration Guide
 
-This repository contains files & documents which help you integrate n8n and Wazuh in order to receive wazuh alerts in your n8n workflows. This helps you automate notifications , responses and documentations based on the alerts and never miss one. Wazuh is an Open-Source SIEM and XDR platform with numerous capabilities while n8n , is another Open-Source platform used by many Developers and IT technicians for automating IT procedures or daily tasks.
+This repository contains files and documentation to help you integrate **n8n** and **Wazuh**, enabling you to receive Wazuh alerts directly in your n8n workflows.  
+This integration allows you to automate notifications, responses, and documentation based on Wazuh alerts—ensuring you never miss one.
 
-## Configuring n8n
+**Wazuh** is an open-source SIEM and XDR platform with numerous capabilities.  
+**n8n** is another open-source automation platform used by many developers and IT technicians to automate IT procedures and daily tasks.
 
-First , you need to create a workflow in your n8n instance. you can name it whatever you want. after creating the workflow you must create a trigger node inside the workflow. The type of the trigger node must be Webhook. from the node you can extract many information needed for the rest of the configurations. Change the path of the webhook if you want a clean URL. If you want to enable authentication for a secure integration , Enable Authentication in the n8n Webhook node with the "Header Auth" type. then create a Credential for that. in the Credential , you must pay attention to the Name and Value you set for the header as we need them later in our python script. Remember to change the HTTP Method to "POST" if it is not already like that. After that, save the workflow and proceed to the next part of the guide.
+## 1. Configuring n8n
 
-## Configuring Wazuh
+1. First, create a new **workflow** in your n8n instance (you can name it whatever you want).
+2. Inside the workflow, create a **Webhook trigger node**.
+3. Adjust the **path** of the webhook if you want a clean URL.
+4. If you want secure integration, enable **Authentication** in the n8n Webhook node using the `"Header Auth"` type.
+5. Create a **Credential** for authentication.  
+   - Pay attention to the **Name** and **Value** you set for the header, as they will be needed later in the Python script.
+6. Change the HTTP Method to **POST** if it’s not already set.
+7. Save the workflow and proceed to Wazuh configuration.
 
-After configuring n8n for the integration , we need to start configuring our Wazuh servers. You MUST apply all these changes to all of the members of your Wazuh Server cluster no matter if it is the master or any of the workers. first , put the custom-n8n file which is in this repository in /var/ossec/integrations/  with the exact same name. you can rename the file to anything you want but you must keep the "custom-" part. after that , put the custom-n8n.py file inside the same path with the exact same name that you used for the first script. the only difference must be the suffix which is not used for the first script and is ".py" for the second one. Now , you must edit the custom-n8n.py script ( or whatever you named it ). There are 2 parts in the script that you must change based on if you have enabled Authentication in the n8n node or not. If you have not enabled Authentication , either comment out or completely remove these 2 parts in the script :
+## 2. Configuring Wazuh
 
+After setting up n8n, configure your Wazuh servers.  
+You **must** apply these changes to **all members** of your Wazuh Server cluster (both master and workers).
+
+1. Place the file `custom-n8n` from this repository into:
+
+```plaintext
+/var/ossec/integrations/
 ```
+
+2. Rename the file only if you wish, but keep the `"custom-"` prefix.
+3. Place the file `custom-n8n.py` into the same directory:
+
+```plaintext
+/var/ossec/integrations/
+```
+
+4. The `.py` file must match the name you used for the first script (with `.py` as the suffix).
+5. Edit the `custom-n8n.py` script as follows:
+
+   - If **Authentication is disabled** in your n8n Webhook node, comment out or remove these parts:
+
+```python
 WEBHOOK_AUTH_TOKEN = "<Your-Authentication-Token>"
 ```
-```
+
+```python
 headers = {
     "content-type": "application/json",
-    "Wazuh-Webhook-Auth-Token": WEBHOOK_AUTH_TOKEN # Comment out if you are not using authentication for your webhook
+    "Wazuh-Webhook-Auth-Token": WEBHOOK_AUTH_TOKEN  # Comment out if not using authentication
 }
 ```
 
-Otherwise , replace <Your-Authentication-Token> with the Value you set in the credential in n8n , and replace "Wazuh-Webhook-Auth-Token" with the name you gave the Credential in n8n. In addition to that , if you have a valid certificate for your n8n instance , comment out this part completely :
+   - If **Authentication is enabled**, replace `<Your-Authentication-Token>` with the **Value** you set in n8n credentials, and replace `"Wazuh-Webhook-Auth-Token"` with the **Credential Name** used in n8n.
 
-```
-# Disable SSL certificate warnings ( Comment out if you have a valid certificate )
+6. If your n8n instance has a valid SSL certificate, comment out this line completely:
+
+```python
+# Disable SSL certificate warnings (comment out if you have a valid certificate)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ```
 
-Otherwise , just keep it.
+   Otherwise, leave it as is.
 
-### Modifying ossec.conf
+## 3. Modifying `ossec.conf`
 
-After completing the previous steps , you must edit your Wazuh Server configuration to use the following scripts for sending the alerts. For that , open /var/ossec/etc/ossec.conf and find a good spot in the <ossec_config></ossec_config> tag and put this tag inside it :
+Edit the Wazuh Server configuration to use your custom integration script:
 
-```
-  <integration>
-    <name>custom-n8n</name>
-    <hook_url>[Your-Webhook-URL]</hook_url>
-    <alert_format>json</alert_format>
-  </integration>
+1. Open:
+
+```plaintext
+/var/ossec/etc/ossec.conf
 ```
 
-Replace [Your-Webhook-URL] with the URL you have in your n8n Webhook node and also , if you have changed the name of the scripts in the previous steps , modify the <name></name> tag and replace the value with the name you chose for the scripts.
+2. Inside the `<ossec_config>` tag, insert:
 
-### Restarting The Services
+```xml
+<integration>
+  <name>custom-n8n</name>
+  <hook_url>[Your-Webhook-URL]</hook_url>
+  <alert_format>json</alert_format>
+</integration>
+```
 
+3. Replace `[Your-Webhook-URL]` with the Webhook URL from your n8n Webhook node.
+4. If you renamed the scripts earlier, update the `<name>` tag accordingly.
+
+## 4. Restarting Wazuh Manager
+
+Restart the Wazuh Manager service to apply changes:
+
+```bash
+sudo systemctl restart wazuh-manager
+```
+
+✅ **You’re all set! , Just wait for the first allert and then extend your workflow based on that !**  
