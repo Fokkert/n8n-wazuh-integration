@@ -1,2 +1,1 @@
-# n8n
-n8n Documents , Templates &amp; Guides 
+# n8n - Wazauh Integration Guide
